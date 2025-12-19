@@ -1,0 +1,39 @@
+Analyse d’une vulnérabilité XSS persistante
+
+Lors de l’examen de l’application web, une faille a été détectée dans la gestion des données issues du formulaire de retour utilisateur. Les informations saisies par les visiteurs sont stockées côté serveur puis réaffichées sur la page, sans protection suffisante lors du rendu HTML.
+
+Les premiers tests montrent que l’application tente de filtrer certaines injections évidentes. Les balises jugées dangereuses, comme <script> ou certains éléments multimédias, sont supprimées avant l’affichage. Cependant, ce filtrage reste partiel et ne prend pas en compte la structure globale du document HTML.
+
+En manipulant le contenu injecté, il est possible de rompre le contexte HTML existant et d’introduire un nouvel élément interactif contenant un attribut JavaScript autorisé. Le mécanisme de filtrage actuel ne neutralise pas ce type de construction, rendant l’injection réalisable malgré les protections apparentes.
+
+Le contenu malveillant reste stocké et est réaffiché à chaque chargement de la page concernée. L’exécution du code JavaScript ne se produit qu’après une action de l’utilisateur, comme un clic sur l’élément injecté, confirmant la présence d’une vulnérabilité XSS persistante.
+
+Une fois l’exploitation réussie, l’application retourne le message suivant avec le flag :
+
+0fbb54bbf7d099713ca4be297e1bc7da0173d8b3c21c1811b916a3a86652724e
+
+Impact de la vulnérabilité
+
+Cette faille permet à un attaquant de :
+
+Exécuter du code JavaScript durablement dans le navigateur des utilisateurs
+
+Accéder aux données de session
+
+Détourner l’interface de l’application
+
+Rediriger les utilisateurs vers des contenus malveillants
+
+Recommandations de sécurité
+
+Pour corriger ce problème, il est nécessaire de :
+
+Sécuriser l’affichage des données utilisateur via un encodage strict adapté au contexte HTML
+
+Éviter les filtres basés sur des listes noires au profit de solutions robustes d’encodage
+
+Restreindre l’utilisation des attributs événementiels JavaScript
+
+Mettre en place une Content Security Policy (CSP) renforcée
+
+Séparer clairement les données de la logique de présentation afin de réduire le risque d’exploitation

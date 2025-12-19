@@ -1,0 +1,60 @@
+# Injection SQL – Page Member
+
+## Contexte
+Dans le cadre de l’analyse de sécurité de l’application WebEX, une vulnérabilité
+d’injection SQL a été identifiée sur la page de recherche des membres.
+
+URL concernée :
+http://192.168.56.101/index.php?page=member
+
+---
+
+## Identification de la vulnérabilité
+
+La page propose un champ permettant de rechercher un membre à partir de son identifiant.
+Aucune validation des données saisies par l’utilisateur n’est effectuée côté serveur.
+
+Un test a été réalisé en injectant une condition SQL directement dans le champ "ID".
+
+Payload utilisé :
+1 OR 1=1
+
+Le résultat obtenu montre que la requête SQL est modifiée et que la condition est
+toujours vraie.
+
+---
+
+## Exploitation de la faille
+
+Suite à l’injection, l’application retourne plusieurs entrées de la base de données,
+alors qu’une seule entrée aurait dû être affichée.
+
+Cela confirme que l’entrée utilisateur est directement intégrée à la requête SQL,
+permettant de contourner la logique applicative.
+
+---
+
+## Résultat
+
+Grâce à cette vulnérabilité, il est possible d’afficher des données non prévues par
+l’application, dont une entrée contenant un flag, prouvant l’exploitation de la faille.
+
+---
+
+## Impact
+
+Cette vulnérabilité permet :
+- le contournement des contrôles applicatifs
+- l’accès non autorisé aux données
+- l’extraction d’informations sensibles
+
+---
+
+## Remédiation
+
+Pour corriger cette vulnérabilité, les mesures suivantes sont recommandées :
+
+- Utiliser des requêtes préparées (PDO ou mysqli)
+- Valider strictement les entrées utilisateur (types numériques attendus)
+- Désactiver l’affichage des erreurs SQL en production
+- Mettre en place des contrôles côté serveur

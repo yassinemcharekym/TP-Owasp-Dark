@@ -1,0 +1,131 @@
+Mesures de remédiation recommandées
+1. Validation stricte des entrées utilisateur (liste blanche)
+
+La cause principale de la vulnérabilité est l’absence de contrôle sur le schéma d’URI fourni par l’utilisateur.
+
+Action recommandée :
+
+Implémenter une validation côté serveur par liste blanche des schémas autorisés.
+
+N’autoriser que les schémas strictement nécessaires au fonctionnement :
+
+https://
+
+éventuellement http:// (si requis)
+
+À interdire explicitement :
+
+data:
+
+javascript:
+
+vbscript:
+
+file:
+
+blob:
+
+ Exemple logique :
+
+Refuser toute URI ne correspondant pas à une expression régulière du type :
+
+^https?:\/\/[a-zA-Z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+$
+
+
+ Ne jamais se contenter de l’encodage HTML (<, >, ") : cela ne protège pas contre les URI interprétées par le navigateur.
+
+2. Abandon de la balise <object> pour du contenu dynamique
+
+La balise <object> est particulièrement dangereuse :
+
+Elle permet l’interprétation de contenu HTML actif
+
+Elle autorise implicitement plusieurs types MIME
+
+Elle est souvent utilisée dans des attaques XSS avancées
+
+Remédiation :
+
+Remplacer <object> par des balises plus sûres selon le besoin :
+
+<img> pour des images
+
+<video> / <audio> pour des médias
+
+<iframe> avec sandbox strict, si vraiment nécessaire
+
+ Exemple avec iframe sécurisé :
+
+<iframe src="..." sandbox="allow-same-origin"></iframe>
+
+
+ Ne jamais autoriser allow-scripts si la source dépend de l’utilisateur.
+
+3. Contrôle strict du type de contenu (MIME)
+
+Même avec une URL valide, un contenu inattendu peut être interprété comme HTML.
+
+Actions :
+
+Vérifier côté serveur le Content-Type réel de la ressource distante
+
+Ne servir que des types MIME explicitement autorisés :
+
+image/png
+
+image/jpeg
+
+video/mp4
+
+etc.
+
+Ajouter systématiquement l’en-tête HTTP :
+
+X-Content-Type-Options: nosniff
+
+4. Mise en place d’une Content Security Policy (CSP) restrictive
+
+La CSP permet de bloquer l’exécution de JavaScript injecté, même si une faille subsiste.
+
+Politique minimale recommandée :
+
+Content-Security-Policy:
+  default-src 'self';
+  script-src 'self';
+  object-src 'none';
+  base-uri 'none';
+
+
+Points clés :
+
+object-src 'none' bloque toute exploitation via <object>
+
+Interdit implicitement les data: pour les scripts
+
+Réduit drastiquement l’impact d’une XSS résiduelle
+
+5. Désactivation explicite des data URI si non nécessaires
+
+Si les data URI ne sont pas indispensables au fonctionnement applicatif :
+
+Les bloquer fonctionnellement
+
+Les bloquer via CSP :
+
+img-src 'self';
+media-src 'self';
+
+
+ Ne jamais utiliser img-src data: sans justification métier claire.
+
+6. Défense en profondeur (recommandé)
+
+En complément :
+
+Ajouter un WAF ou des règles de filtrage applicatif :
+
+Détection des schémas data: / javascript:
+
+Journaliser et alerter en cas de tentative de chargement suspect
+
+Ajouter des tests de sécurité automatisés (SAST / DAST)

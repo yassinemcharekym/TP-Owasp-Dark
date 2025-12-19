@@ -1,0 +1,23 @@
+Exploitation d’un contrôle d’accès basé sur les en‑têtes HTTP
+
+Lors de l’exploration de l’application, une page accessible via le paramètre page présente un comportement particulier. L’accès à cette ressource est possible, mais son contenu reste incomplet : le flag n’est pas affiché lors d’un appel classique.
+
+En examinant le code HTML généré par la page, plusieurs commentaires attirent l’attention. Ceux‑ci laissent entendre que l’affichage du contenu dépend de certains en‑têtes HTTP, notamment Referer et User-Agent. L’application semble donc accorder sa confiance à ces valeurs pour décider si la requête est autorisée.
+
+À partir de cette observation, une requête HTTP est construite manuellement en définissant explicitement un Referer et un User-Agent attendus par l’application. Une fois ces en‑têtes ajoutés, le serveur considère la requête comme valide et retourne le flag sans autre vérification.
+
+Analyse de la faille
+
+Cette vulnérabilité met en évidence une erreur de conception : l’application se base sur des en‑têtes HTTP entièrement contrôlables par le client pour gérer l’accès à une fonctionnalité protégée. Or, ces champs peuvent être modifiés très facilement et ne constituent en aucun cas une preuve d’identité ou de légitimité.
+
+Recommandations de sécurité
+
+Pour éviter ce type de problème, plusieurs bonnes pratiques doivent être respectées :
+
+Ne jamais utiliser les en‑têtes HTTP comme mécanisme de contrôle d’accès
+
+Mettre en place une authentification réelle basée sur des sessions ou des jetons côté serveur
+
+Centraliser la logique d’autorisation côté serveur
+
+Éviter d’exposer des informations sensibles ou des indices exploitables dans les commentaires HTML

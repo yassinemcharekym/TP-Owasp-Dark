@@ -1,0 +1,66 @@
+1. Point d’entrée identifié
+
+L’analyse de l’application montre que certaines pages, comme Survey ou Member, sont accessibles via des URLs structurées ainsi :
+
+http://<ip>/index.php?page=survey
+
+
+Le paramètre page détermine directement la ressource chargée par l’application.
+Puisqu’il s’agit d’une donnée fournie par l’utilisateur, il représente un vecteur potentiel pour des attaques.
+L’hypothèse de travail est que l’application effectue un include ou une lecture de fichier basée sur ce paramètre, sans filtrage suffisant.
+
+2. Exploitation — Path Traversal
+
+Un test simple utilisant un payload de traversal permet de confirmer la vulnérabilité.
+
+Payload utilisé
+../../../../../../../../../../../../etc/passwd
+
+Requête envoyée
+/?page=../../../../../../../../../../../../etc/passwd
+
+Résultat observé
+
+Le serveur interprète le chemin fourni dans le paramètre.
+
+Le contenu du fichier /etc/passwd est retourné et affiché.
+
+Le flag est visible dans la réponse :
+
+b12c4b2cb8094750ae121a676269aa9e2872d07c06e429d25a63196ec1c8c1d0
+
+
+Cette expérience confirme la présence d’une vulnérabilité de type Path Traversal.
+
+3. Recommandations de sécurité
+Filtrage et validation des entrées
+
+Mettre en place une liste blanche des pages autorisées.
+
+Bloquer toute séquence suspecte comme ../, qu’elle soit encodée ou non.
+
+Gestion des chemins
+
+Utiliser des chemins fixes définis côté serveur.
+
+Éviter d’inclure dynamiquement des fichiers basés sur des paramètres GET.
+
+Sécurisation du serveur
+
+Désactiver les options dangereuses telles que allow_url_include.
+
+Restreindre les permissions des fichiers et répertoires accessibles.
+
+Architecture applicative
+
+Isoler les fichiers inclus dans un répertoire dédié, non sensible.
+
+Empêcher l’accès direct au système de fichiers via les paramètres utilisateur.
+
+Tests et surveillance
+
+Intégrer des tests de sécurité automatisés pour détecter les vulnérabilités.
+
+Effectuer des revues de code régulières sur les zones manipulant des fichiers.
+
+Surveiller les logs pour identifier d’éventuelles tentatives de traversal.

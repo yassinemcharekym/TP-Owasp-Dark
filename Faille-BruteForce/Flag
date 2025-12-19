@@ -1,0 +1,68 @@
+Étude du formulaire de connexion
+
+Aucune information préalable n’indique quels comptes sont présents. On commence donc par tester l’hypothèse la plus simple : la présence d’un compte administrateur classique, par exemple admin.
+
+Un essai manuel est effectué avec ces identifiants :
+
+Nom d’utilisateur : admin
+
+Mot de passe : test
+
+L’accès est refusé, ce qui laisse penser que le compte existe, mais que le mot de passe testé n’est pas correct.
+
+Analyse de la requête HTTP
+
+La connexion est interceptée grâce à un proxy spécialisé.
+La requête envoyée au serveur est examinée pour comprendre quels paramètres sont transmis pour l’authentification.
+
+Le champ password est repéré comme la cible idéale pour une attaque automatisée, et sa valeur est marquée pour pouvoir la remplacer dynamiquement lors des essais.
+
+Déploiement d’une attaque par force brute
+
+La requête capturée est transférée vers un outil d’attaque automatique.
+Une liste de mots de passe courants, telle que celle disponible sur Kali Linux, est utilisée pour tester un grand nombre de combinaisons.
+
+Exemple de wordlist utilisée :
+
+/usr/share/wordlists/rockyou.txt
+
+Chaque mot de passe de la liste est envoyé successivement au serveur pour tenter de trouver le bon.
+
+Détection de la réponse correcte
+
+Après l’attaque, les réponses du serveur sont étudiées.
+La plupart des réponses montrent un comportement identique, indiquant un échec.
+
+Cependant, certaines réponses se distinguent par leur contenu ou leur taille, signalant une connexion réussie. C’est grâce à cette différence qu’il est possible de déterminer le mot de passe correct du compte administrateur.
+
+Résultat
+
+L’exploitation de cette vulnérabilité retourne le message de succès suivant, contenant le flag :
+
+b3a6e43ddf8b4bbb4125e5e7d23040433827759d4de1c04ea63907479a80a6b2
+
+L’attaque par force brute sur ce formulaire est donc confirmée comme efficace.
+
+Conséquences potentielles
+
+Cette faille révèle que le système d’authentification ne protège pas contre des tentatives répétées de connexion. Dans un environnement réel, cela pourrait conduire à :
+
+La compromission de comptes sensibles
+
+L’accès non autorisé à un compte administrateur
+
+Une compromission complète de l’application
+
+Recommandations pour corriger la vulnérabilité
+
+Pour limiter ce type d’attaque, plusieurs mesures peuvent être mises en place :
+
+Limiter le nombre de tentatives de connexion consécutives
+
+Introduire des délais progressifs après plusieurs échecs
+
+Bloquer temporairement un compte après un certain nombre d’essais infructueux
+
+Ajouter un CAPTCHA après plusieurs tentatives ratées
+
+Surveiller et journaliser les tentatives anormales de connexion
